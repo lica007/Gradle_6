@@ -212,7 +212,7 @@ public class TransferFromCardToCardTest {
 
     @Test
     @DisplayName("Перевод суммы с копейками")
-    public void shouldShowErrorWhenTransferTheAmountWithKopecks() {
+    public void shouldTransferTheAmountWithKopecks() {
         var personalAcoountPage = new PersonalAccountPage();
 
         int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
@@ -228,7 +228,7 @@ public class TransferFromCardToCardTest {
 
     @Test
     @DisplayName("Перевод суммы больше 5 символов")
-    public void shouldShowErrorWhenTransfer() {
+    public void shouldTransferAmountsOfMoreThan5Digits() {
         var personalAcoountPage = new PersonalAccountPage();
 
         int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
