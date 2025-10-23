@@ -210,6 +210,38 @@ public class TransferFromCardToCardTest {
         }
     }
 
+    @Test
+    @DisplayName("Перевод суммы с копейками")
+    public void shouldShowErrorWhenTransferTheAmountWithKopecks() {
+        var personalAcoountPage = new PersonalAccountPage();
+
+        int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
+        $("[data-test-id='to'] input")
+                .shouldHave(Condition.value("**** **** **** 0001"))
+                .shouldBe(Condition.visible);
+        var transfer = replenishCardPage.getMoneyTransfer("10,57",getSecondCardInfo().getNumber());
+
+        int balanceFirstCardAfterReplenishment = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        assertEquals(balanceFirstCard + 10.57, balanceFirstCardAfterReplenishment);
+    }
+
+    @Test
+    @DisplayName("Перевод суммы больше 5 символов")
+    public void shouldShowErrorWhenTransfer() {
+        var personalAcoountPage = new PersonalAccountPage();
+
+        int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
+        $("[data-test-id='to'] input")
+                .shouldHave(Condition.value("**** **** **** 0001"))
+                .shouldBe(Condition.visible);
+        var transfer = replenishCardPage.getMoneyTransfer("9999,57",getSecondCardInfo().getNumber());
+
+        int balanceFirstCardAfterReplenishment = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        assertEquals(balanceFirstCard + 9999.57, balanceFirstCardAfterReplenishment);
+    }
+
     @AfterEach
     void clearField() {
         reverseTransaction();
