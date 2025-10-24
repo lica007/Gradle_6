@@ -19,10 +19,4 @@ public class VerificationPage {
         buttonCode.click();
         return new PersonalAccountPage();
     }
-
-    public PersonalAccountPage verificationUserCucumber(String verificationCode){
-        codeField.setValue(verificationCode);
-        buttonCode.click();
-        return new PersonalAccountPage();
-    }
 }

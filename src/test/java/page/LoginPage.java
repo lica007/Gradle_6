@@ -20,11 +20,4 @@ public class LoginPage {
         passwordField.setValue(user.getPassword());
         buttonLogin.click();
     }
-
-    public VerificationPage loginUserCucumber(String login, String password){
-        loginField.setValue(login);
-        passwordField.setValue(password);
-        buttonLogin.click();
-        return new VerificationPage();
-    }
 }
