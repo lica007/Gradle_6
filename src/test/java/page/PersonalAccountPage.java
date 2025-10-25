@@ -11,6 +11,7 @@ public class PersonalAccountPage {
     private ElementsCollection cards = $$(".list__item div");
     private final String balanceStart = "баланс: ";
     private final String balanceFinish = " р.";
+    private final String NumberFinish = ", баланс: ";
     private final SelenideElement personalAccountField = $("[data-test-id='dashboard']");
 
     public PersonalAccountPage() {
@@ -34,5 +35,17 @@ public class PersonalAccountPage {
         var finish = text.indexOf(balanceFinish);
         var value = text.substring(start + balanceStart.length(), finish);
         return Integer.parseInt(value);
+    }
+
+    public String getNumberCard(String id) {
+        var numberCard = cards.findBy(Condition.attribute("data-test-id", id)).getText();
+        return extractNumberCard(numberCard);
+    }
+
+    public String extractNumberCard(String text) {
+        var start = 0;
+        var finish = text.indexOf(NumberFinish);
+        var value = text.substring(start, finish);
+        return value.trim();
     }
 }

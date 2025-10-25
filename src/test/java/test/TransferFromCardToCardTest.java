@@ -31,24 +31,35 @@ public class TransferFromCardToCardTest {
         var loginPage = Selenide.open("http://localhost:9999", LoginPage.class);
         var verificationPage = loginPage.loginUser(user);
         var personalAcoountPage = verificationPage.verificationUser(verificationCode);
+        reverseTransaction();
     }
 
     private void reverseTransaction() {
         var personalAcoountPage = new PersonalAccountPage();
         int currentBalanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
 
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
+        String numberSecondCardWhere = personalAcoountPage.getNumberCard(getSecondCardInfo().getCardId());
+
         if (currentBalanceFirstCard != 10_000){
             int sum = currentBalanceFirstCard - 10_000;
             if (sum > 0) {
                 var replenishCardPage = personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
-                replenishCardPage.clearField();
-                var transfer = replenishCardPage.getMoneyTransfer(String.valueOf(sum),getFirstCardInfo().getNumber());
+                var transfer = replenishCardPage.getMoneyTransfer(String.valueOf(sum),getFirstCardInfo().getNumber(), numberSecondCardWhere);
             } else {
                 var replenishCardPage = personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-                replenishCardPage.clearField();
-                var transfer = replenishCardPage.getMoneyTransfer(String.valueOf(-sum),getSecondCardInfo().getNumber());
+                var transfer = replenishCardPage.getMoneyTransfer(String.valueOf(-sum),getSecondCardInfo().getNumber(), numberFirstCardWhere);
             }
         }
+        clearTransactionForms();
+    }
+
+    private void clearTransactionForms() {
+        var personalAccountPage = new PersonalAccountPage();
+        var replenishCardPage = personalAccountPage.getReplenishCard(getFirstCardInfo().getCardId());
+        replenishCardPage.clearField();
+        replenishCardPage.buttonCancel();
+        new PersonalAccountPage();
     }
 
     @Test
@@ -57,14 +68,16 @@ public class TransferFromCardToCardTest {
         var personalAcoountPage = new PersonalAccountPage();
 
         int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCard = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
+
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-        $("[data-test-id='to'] input")
-                .shouldHave(Condition.value("**** **** **** 0001"))
-                .shouldBe(Condition.visible);
-        var transfer = replenishCardPage.getMoneyTransfer("1000",getSecondCardInfo().getNumber());
+        var transfer = replenishCardPage.getMoneyTransfer("1000",getSecondCardInfo().getNumber(), numberFirstCardWhere);
 
         int balanceFirstCardAfterReplenishment = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCardAfterReplenishment = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
         assertEquals(balanceFirstCard + 1000, balanceFirstCardAfterReplenishment);
+        assertEquals(balanceSecondCard - 1000, balanceSecondCardAfterReplenishment);
     }
 
     @Test
@@ -72,18 +85,13 @@ public class TransferFromCardToCardTest {
     public void shouldShowErrorWhenTransferAmountExceedsBalance() {
         var personalAcoountPage = new PersonalAccountPage();
 
-        try {
+        String numberSecondCardWhere = personalAcoountPage.getNumberCard(getSecondCardInfo().getCardId());
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
-        $("[data-test-id='to'] input")
-                .shouldHave(Condition.value("**** **** **** 0002"))
-                .shouldBe(Condition.visible);
-        var transfer = replenishCardPage.getMoneyTransfer("12000",getFirstCardInfo().getNumber());
+
+        var transfer = replenishCardPage.getMoneyTransfer("12000",getFirstCardInfo().getNumber(), numberSecondCardWhere);
         $("[data-test-id='error-notification']")
                 .shouldBe(Condition.visible, Duration.ofSeconds(5))
                 .shouldHave(Condition.text("Ошибка!"));
-        } finally {
-            $("[data-test-id='action-cancel']").click();
-        }
     }
 
     @Test
@@ -91,18 +99,13 @@ public class TransferFromCardToCardTest {
     public void shouldShowErrorWhenTransferToANonExistentCard() {
         var personalAcoountPage = new PersonalAccountPage();
 
-        try {
-            var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
-            $("[data-test-id='to'] input")
-                    .shouldHave(Condition.value("**** **** **** 0002"))
-                    .shouldBe(Condition.visible);
-            var transfer = replenishCardPage.getMoneyTransfer("2000","5559000000000006");
-            $("[data-test-id='error-notification'] .notification__content")
-                    .shouldBe(Condition.visible)
-                    .shouldHave(Condition.text("Ошибка!"));
-        } finally {
-            $("[data-test-id='action-cancel']").click();
-        }
+        String numberSecondCardWhere = personalAcoountPage.getNumberCard(getSecondCardInfo().getCardId());
+        var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
+
+        var transfer = replenishCardPage.getMoneyTransfer("2000","5559000000000006", numberSecondCardWhere);
+        $("[data-test-id='error-notification'] .notification__content")
+                .shouldBe(Condition.visible, Duration.ofSeconds(5))
+                .shouldHave(Condition.text("Ошибка!"));
     }
 
     @Test
@@ -110,18 +113,13 @@ public class TransferFromCardToCardTest {
     public void shouldShowErrorWhenTransferToTheSameCard() {
         var personalAcoountPage = new PersonalAccountPage();
 
-        try {
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-        $("[data-test-id='to'] input")
-                .shouldHave(Condition.value("**** **** **** 0001"))
-                .shouldBe(Condition.visible);
-        var transfer = replenishCardPage.getMoneyTransfer("2000",getFirstCardInfo().getNumber());
+
+        var transfer = replenishCardPage.getMoneyTransfer("2000",getFirstCardInfo().getNumber(), numberFirstCardWhere);
         $("[data-test-id='error-notification'] .notification__content")
-                .shouldBe(Condition.visible)
+                .shouldBe(Condition.visible, Duration.ofSeconds(5))
                 .shouldHave(Condition.text("Ошибка!"));
-        } finally {
-            $("[data-test-id='action-cancel']").click();
-        }
     }
 
     @Test
@@ -131,25 +129,29 @@ public class TransferFromCardToCardTest {
 
         // Первый перевод
         int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCard = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-        $("[data-test-id='to'] input")
-                .shouldHave(Condition.value("**** **** **** 0001"))
-                .shouldBe(Condition.visible);
-        var transfer = replenishCardPage.getMoneyTransfer("1000",getSecondCardInfo().getNumber());
+
+        var transfer = replenishCardPage.getMoneyTransfer("1000",getSecondCardInfo().getNumber(), numberFirstCardWhere);
 
         int balanceFirstCardAfterReplenishment = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCardAfterReplenishment = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
         assertEquals(balanceFirstCard + 1000, balanceFirstCardAfterReplenishment);
+        assertEquals(balanceSecondCard - 1000, balanceSecondCardAfterReplenishment);
 
         // Второй перевод
-        int balanceSecondCard = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
+        int balanceFirstCard2 = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCard2 = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
+        String numberSecondCardWhere = personalAcoountPage.getNumberCard(getSecondCardInfo().getCardId());
         var replenishCardPage2 =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
-        $("[data-test-id='to'] input")
-                .shouldHave(Condition.value("**** **** **** 0002"))
-                .shouldBe(Condition.visible);
-        var transfer2 = replenishCardPage2.getMoneyTransfer("1000",getFirstCardInfo().getNumber());
 
-        int balanceSecondCardAfterReplenishment = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
-        assertEquals(balanceSecondCard + 1000, balanceSecondCardAfterReplenishment);
+        var transfer2 = replenishCardPage2.getMoneyTransfer("1000",getFirstCardInfo().getNumber(), numberSecondCardWhere);
+
+        int balanceFirstCardAfterReplenishment2 = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCardAfterReplenishment2 = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
+        assertEquals(balanceFirstCard2 + 1000, balanceFirstCardAfterReplenishment2);
+        assertEquals(balanceSecondCard2 - 1000, balanceSecondCardAfterReplenishment2);
 
     }
 
@@ -158,18 +160,13 @@ public class TransferFromCardToCardTest {
     public void shouldShowErrorWhenTransferWithEmptyFields() {
         var personalAcoountPage = new PersonalAccountPage();
 
-        try {
-            var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-            $("[data-test-id='to'] input")
-                    .shouldHave(Condition.value("**** **** **** 0001"))
-                    .shouldBe(Condition.visible);
-            var transfer = replenishCardPage.getMoneyTransfer(null,null);
-            $("[data-test-id='error-notification'] .notification__content")
-                    .shouldBe(Condition.visible)
-                    .shouldHave(Condition.text("Ошибка!"));
-        } finally {
-            $("[data-test-id='action-cancel']").click();
-        }
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
+        var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
+
+        var transfer = replenishCardPage.getMoneyTransfer(null,null, numberFirstCardWhere);
+        $("[data-test-id='error-notification'] .notification__content")
+                .shouldBe(Condition.visible, Duration.ofSeconds(5))
+                .shouldHave(Condition.text("Ошибка!"));
     }
 
     @Test
@@ -177,18 +174,13 @@ public class TransferFromCardToCardTest {
     public void shouldErrorWhenTransferWithAnEmptyCardNumberField() {
         var personalAcoountPage = new PersonalAccountPage();
 
-        try {
-            var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-            $("[data-test-id='to'] input")
-                    .shouldHave(Condition.value("**** **** **** 0001"))
-                    .shouldBe(Condition.visible);
-            var transfer = replenishCardPage.getMoneyTransfer("200",null);
-            $("[data-test-id='error-notification'] .notification__content")
-                    .shouldBe(Condition.visible)
-                    .shouldHave(Condition.text("Ошибка!"));
-        } finally {
-            $("[data-test-id='action-cancel']").click();
-        }
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
+        var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
+
+        var transfer = replenishCardPage.getMoneyTransfer("200", null, numberFirstCardWhere);
+        $("[data-test-id='error-notification'] .notification__content")
+                .shouldBe(Condition.visible, Duration.ofSeconds(5))
+                .shouldHave(Condition.text("Ошибка!"));
     }
 
     @Test
@@ -196,18 +188,13 @@ public class TransferFromCardToCardTest {
     public void shouldErrorWhenTransferWithAnEmptyAmountField() {
         var personalAcoountPage = new PersonalAccountPage();
 
-        try {
-            var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-            $("[data-test-id='to'] input")
-                    .shouldHave(Condition.value("**** **** **** 0001"))
-                    .shouldBe(Condition.visible);
-            var transfer = replenishCardPage.getMoneyTransfer(null,getSecondCardInfo().getNumber());
-            $("[data-test-id='error-notification'] .notification__content")
-                    .shouldBe(Condition.visible)
-                    .shouldHave(Condition.text("Ошибка!"));
-        } finally {
-            $("[data-test-id='action-cancel']").click();
-        }
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
+        var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
+
+        var transfer = replenishCardPage.getMoneyTransfer(null, getSecondCardInfo().getNumber(), numberFirstCardWhere);
+        $("[data-test-id='error-notification'] .notification__content")
+                .shouldBe(Condition.visible, Duration.ofSeconds(5))
+                .shouldHave(Condition.text("Ошибка!"));
     }
 
     @Test
@@ -216,14 +203,16 @@ public class TransferFromCardToCardTest {
         var personalAcoountPage = new PersonalAccountPage();
 
         int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCard = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
+
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-        $("[data-test-id='to'] input")
-                .shouldHave(Condition.value("**** **** **** 0001"))
-                .shouldBe(Condition.visible);
-        var transfer = replenishCardPage.getMoneyTransfer("10,57",getSecondCardInfo().getNumber());
+        var transfer = replenishCardPage.getMoneyTransfer("10,57", getSecondCardInfo().getNumber(), numberFirstCardWhere);
 
         int balanceFirstCardAfterReplenishment = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCardAfterReplenishment = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
         assertEquals(balanceFirstCard + 10.57, balanceFirstCardAfterReplenishment);
+        assertEquals(balanceSecondCard - 10.57, balanceSecondCardAfterReplenishment);
     }
 
     @Test
@@ -232,18 +221,15 @@ public class TransferFromCardToCardTest {
         var personalAcoountPage = new PersonalAccountPage();
 
         int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCard = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
+        String numberFirstCardWhere = personalAcoountPage.getNumberCard(getFirstCardInfo().getCardId());
+
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
-        $("[data-test-id='to'] input")
-                .shouldHave(Condition.value("**** **** **** 0001"))
-                .shouldBe(Condition.visible);
-        var transfer = replenishCardPage.getMoneyTransfer("9999,57",getSecondCardInfo().getNumber());
+        var transfer = replenishCardPage.getMoneyTransfer("9999,57",getSecondCardInfo().getNumber(), numberFirstCardWhere);
 
         int balanceFirstCardAfterReplenishment = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
+        int balanceSecondCardAfterReplenishment = personalAcoountPage.getBalanceCard(getSecondCardInfo().getCardId());
         assertEquals(balanceFirstCard + 9999.57, balanceFirstCardAfterReplenishment);
-    }
-
-    @AfterEach
-    void clearField() {
-        reverseTransaction();
+        assertEquals(balanceSecondCard - 9999.57, balanceSecondCardAfterReplenishment);
     }
 }
