@@ -3,7 +3,6 @@ package test;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selenide;
 import data.DataHelper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +17,7 @@ import java.util.Dictionary;
 
 import static com.codeborne.selenide.Selenide.$;
 import static data.DataHelper.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TransferFromCardToCardTest {
 
@@ -65,6 +63,7 @@ public class TransferFromCardToCardTest {
     @Test
     @DisplayName("Успешный перевод с карты 0001 на карту 0002")
     public void shouldTransferFromTheFirstCardToTheSecond() {
+
         var personalAcoountPage = new PersonalAccountPage();
 
         int balanceFirstCard = personalAcoountPage.getBalanceCard(getFirstCardInfo().getCardId());
@@ -89,9 +88,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("12000",getFirstCardInfo().getNumber(), numberSecondCardWhere);
-        $("[data-test-id='error-notification']")
-                .shouldBe(Condition.visible, Duration.ofSeconds(5))
-                .shouldHave(Condition.text("Ошибка!"));
+        assertTrue(replenishCardPage.getErrorMsg());
     }
 
     @Test
@@ -103,9 +100,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("2000","5559000000000006", numberSecondCardWhere);
-        $("[data-test-id='error-notification'] .notification__content")
-                .shouldBe(Condition.visible, Duration.ofSeconds(5))
-                .shouldHave(Condition.text("Ошибка!"));
+        assertTrue(replenishCardPage.getErrorMsg());
     }
 
     @Test
@@ -117,9 +112,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("2000",getFirstCardInfo().getNumber(), numberFirstCardWhere);
-        $("[data-test-id='error-notification'] .notification__content")
-                .shouldBe(Condition.visible, Duration.ofSeconds(5))
-                .shouldHave(Condition.text("Ошибка!"));
+        assertTrue(replenishCardPage.getErrorMsg());
     }
 
     @Test
@@ -164,9 +157,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer(null,null, numberFirstCardWhere);
-        $("[data-test-id='error-notification'] .notification__content")
-                .shouldBe(Condition.visible, Duration.ofSeconds(5))
-                .shouldHave(Condition.text("Ошибка!"));
+        assertTrue(replenishCardPage.getErrorMsg());
     }
 
     @Test
@@ -178,13 +169,11 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("200", null, numberFirstCardWhere);
-        $("[data-test-id='error-notification'] .notification__content")
-                .shouldBe(Condition.visible, Duration.ofSeconds(5))
-                .shouldHave(Condition.text("Ошибка!"));
+        assertTrue(replenishCardPage.getErrorMsg());
     }
 
     @Test
-    @DisplayName("Перевод с пустым полем суммы перевода")
+    @DisplayName("Перевод с пустым полем суммы перевода: ожидаем сообщение об ошибке")
     public void shouldErrorWhenTransferWithAnEmptyAmountField() {
         var personalAcoountPage = new PersonalAccountPage();
 
@@ -192,9 +181,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer(null, getSecondCardInfo().getNumber(), numberFirstCardWhere);
-        $("[data-test-id='error-notification'] .notification__content")
-                .shouldBe(Condition.visible, Duration.ofSeconds(5))
-                .shouldHave(Condition.text("Ошибка!"));
+        assertTrue(replenishCardPage.getErrorMsg());
     }
 
     @Test
@@ -216,7 +203,7 @@ public class TransferFromCardToCardTest {
     }
 
     @Test
-    @DisplayName("Перевод суммы больше 5 символов")
+    @DisplayName("Перевод суммы больше 6 символов")
     public void shouldTransferAmountsOfMoreThan5Digits() {
         var personalAcoountPage = new PersonalAccountPage();
 

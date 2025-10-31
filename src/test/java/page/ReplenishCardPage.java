@@ -2,8 +2,9 @@ package page;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
-import data.DataHelper;
 import org.openqa.selenium.Keys;
+
+import java.time.Duration;
 
 import static com.codeborne.selenide.Selenide.$;
 
@@ -14,6 +15,7 @@ public class ReplenishCardPage {
     private final SelenideElement cancelButton = $("[data-test-id='action-cancel']");
     private final SelenideElement replenishButton = $("[data-test-id='action-transfer']");
     private final SelenideElement replenishCardField = $("[data-test-id='dashboard']");
+    private final SelenideElement errorMsg = $("[data-test-id='error-notification'] .notification__content");
 
     public ReplenishCardPage(){
         replenishCardField.should(Condition.visible);
@@ -38,5 +40,15 @@ public class ReplenishCardPage {
 
     public void buttonCancel() {
         cancelButton.click();
+    }
+
+    public boolean getErrorMsg() {
+        try {
+            errorMsg.shouldBe(Condition.visible, Duration.ofSeconds(5))
+                    .shouldHave(Condition.text("Ошибка!"));
+            return true;
+        } catch (AssertionError e) {
+            return false;
+        }
     }
 }
