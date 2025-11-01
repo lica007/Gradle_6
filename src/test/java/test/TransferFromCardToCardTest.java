@@ -1,6 +1,5 @@
 package test;
 
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selenide;
 import data.DataHelper;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,14 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import page.LoginPage;
 import page.PersonalAccountPage;
-import page.ReplenishCardPage;
 
-import javax.lang.model.element.ModuleElement;
-import java.beans.Transient;
-import java.time.Duration;
-import java.util.Dictionary;
-
-import static com.codeborne.selenide.Selenide.$;
 import static data.DataHelper.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -88,7 +80,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("12000",getFirstCardInfo().getNumber(), numberSecondCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg());
+        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
     }
 
     @Test
@@ -99,8 +91,8 @@ public class TransferFromCardToCardTest {
         String numberSecondCardWhere = personalAcoountPage.getNumberCard(getSecondCardInfo().getCardId());
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
 
-        var transfer = replenishCardPage.getMoneyTransfer("2000","5559000000000006", numberSecondCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg());
+        var transfer = replenishCardPage.getMoneyTransfer("2000", String.valueOf(RandomCardInfo.generateCardInfo("ru").getNumber()), numberSecondCardWhere);
+        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
     }
 
     @Test
@@ -112,7 +104,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("2000",getFirstCardInfo().getNumber(), numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg());
+        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
     }
 
     @Test
@@ -157,7 +149,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer(null,null, numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg());
+        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
     }
 
     @Test
@@ -169,7 +161,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("200", null, numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg());
+        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
     }
 
     @Test
@@ -181,7 +173,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer(null, getSecondCardInfo().getNumber(), numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg());
+        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
     }
 
     @Test

@@ -1,6 +1,9 @@
 package data;
 
+import com.github.javafaker.Faker;
 import lombok.Value;
+
+import java.util.Locale;
 
 public class DataHelper {
 
@@ -21,6 +24,26 @@ public class DataHelper {
 
     public static CardInfo getSecondCardInfo() {
         return new CardInfo("5559 0000 0000 0002", "0f3f5c2a-249e-4c3d-8287-09f7a039391d");
+    }
+
+    public static String generateNumberCard(Faker faker) {
+        return faker.finance().creditCard();
+    }
+
+    public static String generateIdCard(Faker faker) {
+        return faker.number().digits(36);
+    }
+
+    public static class RandomCardInfo {
+        private static Faker faker;
+
+        private RandomCardInfo() {
+        }
+
+        public static CardInfo generateCardInfo(String locale) {
+            faker = new Faker(new Locale(locale));
+            return new CardInfo(generateNumberCard(faker), generateIdCard(faker));
+        }
     }
 
     @Value

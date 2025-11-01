@@ -42,13 +42,9 @@ public class ReplenishCardPage {
         cancelButton.click();
     }
 
-    public boolean getErrorMsg() {
-        try {
+    public boolean getErrorMsg(String msg) {
             errorMsg.shouldBe(Condition.visible, Duration.ofSeconds(5))
-                    .shouldHave(Condition.text("Ошибка!"));
+                    .shouldHave(Condition.text(msg));
             return true;
-        } catch (AssertionError e) {
-            return false;
-        }
     }
 }
