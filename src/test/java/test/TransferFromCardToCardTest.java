@@ -80,7 +80,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("12000",getFirstCardInfo().getNumber(), numberSecondCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
+        replenishCardPage.getErrorMsg("Ошибка!");
     }
 
     @Test
@@ -92,7 +92,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getSecondCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("2000", String.valueOf(RandomCardInfo.generateCardInfo("ru").getNumber()), numberSecondCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
+        replenishCardPage.getErrorMsg("Ошибка!");
     }
 
     @Test
@@ -104,7 +104,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("2000",getFirstCardInfo().getNumber(), numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
+        replenishCardPage.getErrorMsg("Ошибка!");
     }
 
     @Test
@@ -149,7 +149,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer(null,null, numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
+        replenishCardPage.getErrorMsg("Ошибка!");
     }
 
     @Test
@@ -161,7 +161,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer("200", null, numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
+        replenishCardPage.getErrorMsg("Ошибка!");
     }
 
     @Test
@@ -173,7 +173,7 @@ public class TransferFromCardToCardTest {
         var replenishCardPage =  personalAcoountPage.getReplenishCard(getFirstCardInfo().getCardId());
 
         var transfer = replenishCardPage.getMoneyTransfer(null, getSecondCardInfo().getNumber(), numberFirstCardWhere);
-        assertTrue(replenishCardPage.getErrorMsg("Ошибка!"));
+        replenishCardPage.getErrorMsg("Ошибка!");
     }
 
     @Test

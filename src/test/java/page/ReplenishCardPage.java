@@ -42,9 +42,8 @@ public class ReplenishCardPage {
         cancelButton.click();
     }
 
-    public boolean getErrorMsg(String msg) {
+    public void getErrorMsg(String msg) {
             errorMsg.shouldBe(Condition.visible, Duration.ofSeconds(5))
                     .shouldHave(Condition.text(msg));
-            return true;
     }
 }
